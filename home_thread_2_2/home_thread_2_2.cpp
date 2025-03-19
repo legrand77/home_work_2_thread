@@ -51,7 +51,7 @@ int main()
 {
    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
     vector<thread> T; 
-    int N{10};
+    int N{3};
     cout << "#" << "    #id " << "                         Progress Bar"  << "                        %   "<<"                 time ";
     for (size_t i = 0; i < N; i++) {
         T.push_back(thread(drawROWprogress, 18, i+1));
