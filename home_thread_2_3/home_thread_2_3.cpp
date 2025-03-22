@@ -19,95 +19,75 @@ public:
 };
 
 void swap1(Data& x, Data& y) {
+    lock(x.m, y.m);
+    lock_guard<mutex> l(x.m, adopt_lock);
+    lock_guard<mutex> l1(y.m, adopt_lock);
+    x.a += y.a;
+    y.a = x.a - y.a;
+    x.a = x.a - y.a;
+    x.b += y.b;
+    y.b = x.b - y.b;
+    x.b = x.b - y.b;
+    swap(x.s, y.s);
 
-    int temp_a{};
-    double temp_b{};
-    string temp_s{};
-    x.m.lock();
-    y.m.lock();
-
-    temp_a = x.a;
-    x.a = y.a;
-    y.a = temp_a;
-
-    temp_b = x.b;
-    x.b = y.b;
-    y.b = temp_b;
-
-    temp_s = x.s;
-    x.s = y.s;
-    y.s = temp_s;
-
-    x.m.unlock();
-    y.m.unlock();
+    cout << endl << "ThreadId: " << this_thread::get_id() << ". after: " __FUNCTION__ << endl;
+    cout << "value_ = " << x.s << ";" << endl;
+    cout << "value_ = " << y.s << ";" << endl;
 }
 
 void swap2(Data& x, Data& y) {
 
     scoped_lock L{x.m, y.m};
 
-    int temp_a{};
-    double temp_b{};
-    string temp_s{};
+    x.a += y.a;
+    y.a = x.a - y.a;
+    x.a = x.a - y.a;
+    x.b += y.b;
+    y.b = x.b - y.b;
+    x.b = x.b - y.b;
+    swap(x.s, y.s);
 
-    temp_a = x.a;
-    x.a = y.a;
-    y.a = temp_a;
+    cout << std::endl << "ThreadId: " << this_thread::get_id() << ". after: " __FUNCTION__ << endl;
+    cout << "value_ = " << x.s << ";" << endl;
+    cout << "value_ = " << y.s << ";" << endl;
 
-    temp_b = x.b;
-    x.b = y.b;
-    y.b = temp_b;
 
-    temp_s = x.s;
-    x.s = y.s;
-    y.s = temp_s;
 }
 
 void swap3(Data& x, Data& y) {
 
-    unique_lock<mutex> l(x.m);
-    unique_lock<mutex> l1(y.m);
-    int temp_a{};
-    double temp_b{};
-    string temp_s{};
+    unique_lock<mutex> l(x.m, defer_lock);
+    unique_lock<mutex> l1(y.m, defer_lock);
+    lock(l, l1);
+    x.a += y.a;
+    y.a = x.a - y.a;
+    x.a = x.a - y.a;
+    x.b += y.b;
+    y.b = x.b - y.b;
+    x.b = x.b - y.b;
+    swap(x.s, y.s);
 
-    temp_a = x.a;
-    x.a = y.a;
-    y.a = temp_a;
+    cout << std::endl << "ThreadId: " << this_thread::get_id() << ". after: " __FUNCTION__ << endl;
+    cout << "value_ = " << x.s << ";" << endl;
+    cout << "value_ = " << y.s << ";" << endl;
 
-    temp_b = x.b;
-    x.b = y.b;
-    y.b = temp_b;
-
-    temp_s = x.s;
-    x.s = y.s;
-    y.s = temp_s;
-    l.unlock();
-    l1.unlock();
 
 }
 
 
 int main(){
 
-    Data x1(1, 2.4, "e");
-    Data y1(4, 3.4, "p");
+    Data x1(1, 2.4, "eee");
+    Data y1(4, 3.4, "ppp");
 
     thread t1(swap1,ref(x1), ref(y1));  
-    thread t2(swap1, ref(x1), ref(y1));
-    thread t3(swap2, ref(x1), ref(y1));
-    thread t4(swap2, ref(x1), ref(y1));
-    thread t5(swap3, ref(x1), ref(y1));
-    thread t6(swap3, ref(x1), ref(y1));
+    thread t2(swap2, ref(x1), ref(y1));
+    thread t3(swap3, ref(x1), ref(y1));
 
     t1.join();
     t2.join();
     t3.join();
-    t4.join();
-    t5.join();
-    t6.join();
 
-    cout << y1.a << endl;
     return EXIT_SUCCESS;
 
 }
